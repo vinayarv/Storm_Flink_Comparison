@@ -40,7 +40,7 @@ public class TweetCount {
 				                           new SimpleStringSchema(), parameterTool.getProperties()));
 	
 		messageStream.flatMap(new ParseTweetBolt()).
-		flatMap(new CountBolt()).keyBy(0).
+		flatMap(new CountBolt()).
 		flatMap(new SqlBolt());
 		
 

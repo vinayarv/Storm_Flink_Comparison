@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 
@@ -23,7 +25,11 @@ import backtype.storm.tuple.Values;
  */
 public class ParseTweetBolt extends BaseRichBolt
 {
-  // To output tuples from this bolt to the count bolt
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+// To output tuples from this bolt to the count bolt
   OutputCollector collector;
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -41,29 +47,25 @@ public class ParseTweetBolt extends BaseRichBolt
   public void execute(Tuple tuple)
   {
 	  String tweet = tuple.getString(0);
+	  JsonNode root;
+	  long r_ts;
+	  String tweet_text;
       
-      JsonNode root;
-		try {
-			root = mapper.readValue(tweet, JsonNode.class);
-		
-      long id;
-      String text;
-      if (root.get("lang") != null &&
-          "en".equals(root.get("lang").getTextValue()))
-      {
-          if (root.get("id") != null && root.get("text") != null)
-          {
-              //id = root.get("id").getLongValue();
-              text = root.get("text").getTextValue();
-              StringTokenizer tokenizer = new StringTokenizer(text);
-              // split the message
-				while (tokenizer.hasMoreTokens()) {
-					String token = tokenizer.nextToken().replaceAll("\\s*", "").toLowerCase();
-					collector.emit(new Values(token));
-				}
-              
-          }
-      }
+	  try {
+		  
+		  root = mapper.readValue(tweet, JsonNode.class);
+		  long rk_ts = root.get("timestamp_ms").getLongValue();
+		  r_ts = System.currentTimeMillis();
+		  tweet_text = root.get("text").getTextValue();
+	        if (root.get("lang") != null &&
+	          "en".equals(root.get("lang").getTextValue()))
+	        {    	
+	            tweet_text = tweet_text.replaceAll("\\s*", "").toLowerCase();
+	              
+	        }
+	        
+	        collector.emit(new Values(rk_ts,r_ts,tweet_text));  
+	         
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,8 +76,6 @@ public class ParseTweetBolt extends BaseRichBolt
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer)
   {
-    // tell storm the schema of the output tuple for this spout
-    // tuple consists of a single column called 'tweet-word'
-    declarer.declare(new Fields("tweet-word"));
+    declarer.declare(new Fields("rk_ts","r_ts", "tweet_text"));
   }
 }

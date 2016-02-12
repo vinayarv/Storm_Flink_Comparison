@@ -1,0 +1,30 @@
+CREATE TABLE T_FLINK_PCT_KAFKA  AS Select COUNT REC_EMIT, COUNT(1) REC_PRCSD, (COUNT(1) /COUNT)*100 PCT_PRCSD, WIND_TS    from (
+Select count(1)  count, wind_ts from (
+SELECT 
+   READ_TS, WRITE_TS, WRITE_TS - READ_TS latency, wind_ts
+FROM
+    (SELECT 
+        a.*, wind_ts
+    FROM
+         ( SELECT 
+        *
+    FROM
+        (SELECT 
+        READ_TS + INTERVAL Seq_no SECOND wind_ts
+    FROM
+        (SELECT 
+        MIN(READ_TS) read_ts
+    FROM
+        T_FLINK_BENCHMARK) a, (SELECT 
+        @rownum:=@rownum + 1 AS Seq_no
+    FROM
+        (SELECT @rownum:=0) b, (SELECT 
+        1
+        FROM
+        T_FLINK_BENCHMARK) c) b) e  LIMIT 35) g LEFT JOIN T_FLINK_BENCHMARK a   
+    ON (
+        READ_TS  >= (wind_ts - INTERVAL 10 SECOND)
+            AND READ_TS  <= wind_ts)) f) h
+GROUP BY wind_ts) i LEFT JOIN T_FLINK_BENCHMARK j
+ON ( j.write_ts >= (i.wind_ts - INTERVAL 10 SECOND) and j.write_ts <= i.wind_ts AND j.read_ts >=  (i.wind_ts - INTERVAL 10 SECOND)  AND j.read_ts <= i.WIND_TS) 
+GROUP BY WIND_TS;

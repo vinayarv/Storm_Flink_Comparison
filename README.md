@@ -7,6 +7,7 @@ Presentation: http://bitly.com/sbInsight
 
 Introduction: 
 Core storm and flink comparison without introducing any performance tunings in both of them.
+It's not a full fledged comparison. 
 
 Pipeline:
 

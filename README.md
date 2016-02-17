@@ -6,6 +6,8 @@ Presentation: http://bitly.com/sbInsight
 The project aims to compare Storm and Flink, two popular open source distributed real-time computation systems. 
 
 #Pipeline:
+![GitHub Logo](/images/pipeline.png)
+Format: ![Alt Text](url)
 
 
 #Insights:

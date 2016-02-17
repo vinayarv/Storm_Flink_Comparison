@@ -4,7 +4,7 @@
 The project aims to compare Storm and Flink, two popular open source distributed real-time computation systems. The objective is to compare the technologies by considering a straighforward implementation each one provides.
 
 #Pipeline:
-![GitHub Logo](/images/pipeline.png)
+<img src="/images/pipeline.png" width="600">
 
 Twitter data is considered for processing. When ingesting the twitter data from kafka, I assign a read_ts to each record.
 read_ts provides actual emitted time in milli-second from kafka. In storm/flink, after consuming the data I parse the tweets based on language. Since I don't want to lose the record as I'm calculating throughput, I just checked whether the language is "english" is parse program. After parsing, I pass the records tweet data along with timestamp to compute class to count the number of characters in the tweet. The result of the compute class is then sent to a class that make DB connection. This class writes the (read_ts,write_ts) to the MYSQL DB. write_ts indicates the end of processing cycle.
@@ -18,6 +18,7 @@ If I had considered window/tick_tuple method of implementation, I could have cla
 * The total tweets processed in storm is high compared to that in Flink.
 
 ![GitHub Logo](/images/flink_job_scheduling.png)
+
 Flink distrubutes the job as mini-pipeline(datasource-parse-count-sql). So, throughput and latency per window is very good.
 
 Below is the list of the tunings I considered for storm.
@@ -28,6 +29,8 @@ When storm makes connection with kafka, it tries to read all the emitted records
 
 #Results:
 The results along with the calculation method is discussed in the presentation: http://bitly.com/sbInsight
+<img src="/images/storm_distrubution.png" width="450"><img src="/images/flink_distribution.png" width ="450">
+<img src="/images/flink_throughput.png" width="450"><img src="/images/flink_latency.png" width="450">
 
 #Conclusion:
 * If a user wants fast real-time computation per window then Flink is better choice.

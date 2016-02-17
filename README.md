@@ -29,7 +29,7 @@ When storm makes connection with kafka, it tries to read all the emitted records
 
 #Results:
 The results along with the calculation method is discussed in the presentation: http://bitly.com/sbInsight
-![]<img src="/images/storm_distrubution.png" width="100">![] <img src="/images/flink_distribution.png" width ="100">
+<img src="/images/storm_distrubution.png" width="200"><img src="/images/flink_distribution.png" width ="200">
 
 
 #Conclusion:

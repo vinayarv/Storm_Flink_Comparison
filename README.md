@@ -29,7 +29,9 @@ When storm makes connection with kafka, it tries to read all the emitted records
 
 #Results:
 The results along with the calculation method is discussed in the presentation: http://bitly.com/sbInsight
-![GitHub Logo](/images/flink_job_scheduling.png)![GitHub Logo](/images/flink_job_scheduling.png)
+Storm Distribution             |  Flink Distribution
+:-------------------------:|:-------------------------:
+![](/images/storm_distribution.png)  |  ![](/images/flink_distribution.png)
 #Conclusion:
 * If a user wants fast real-time computation per window then Flink is better choice.
 * If a user considers overall throughput, then storm is the choice.

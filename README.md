@@ -31,7 +31,7 @@ The results along with the calculation method is discussed in the presentation: 
 
 
 <img src="/images/storm_distrubution.png" width="400"><img src="/images/flink_distribution.png" width ="400">
-<img src="/images/flink_throughput.png" width="450"><img src="/images/flink_latency.png" width="400">
+<img src="/images/flink_throughput.png" width="400"><img src="/images/flink_latency.png" width="400">
 
 #Conclusion:
 * If a user wants fast real-time computation per window then Flink is better choice.

@@ -1,2 +1,26 @@
 
-hhhjjjjjj
+CREATE TABLE T_STORM_KAFKA_WRITE_COUNT
+AS
+   SELECT COUNT REC_EMIT, COUNT (1) REC_PRCSD, WIND_TS
+     FROM (SELECT COUNT (1) COUNT, wind_ts
+             FROM (SELECT KAFKA_TS, WRITE_TS, WIND_TS
+                     FROM (SELECT STORM.*, wind_ts
+                             FROM (SELECT *
+                                     FROM (SELECT READ_TS + INTERVAL Seq_no SECOND wind_ts
+                                            FROM (SELECT MIN(KAFKA_TS) read_ts
+                                                  FROM T_STORM_BENCHMARK ) MIN_KAFKA_TS, 
+                                                  (SELECT @rownum:=@rownum +10 AS Seq_no
+                                                   FROM (SELECT @rownum:=0) SEQ, 
+                                                        (SELECT   1
+                                                         FROM T_STORM_BENCHMARK) DUMMY_REC
+                                                  ) SEQ_NUM_GEN
+                                           ) WIN_SLOTS  LIMIT 30 
+                                   ) WIN_SLOTS_LIMIT  
+                             LEFT JOIN T_STORM_BENCHMARK STORM
+    ON (KAFKA_TS >= (wind_ts - INTERVAL 10 SECOND) AND KAFKA_TS <= wind_ts)
+                           ) WIN_EMITTED_REC
+                 ) h GROUP BY wind_ts
+           ) WIN_EMITTED_REC  
+    LEFT JOIN T_STORM_BENCHMARK STORM
+ON ( STORM. WRITE_TS >= (WIN_EMITTED_REC.wind_ts - INTERVAL 10 SECOND) and STORM. WRITE_TS <= WIN_EMITTED_REC.wind_ts)
+GROUP BY WIND_TS;

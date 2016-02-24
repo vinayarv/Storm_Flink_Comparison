@@ -1,30 +1,27 @@
-CREATE TABLE T_FLINK_PCT AS Select COUNT REC_EMIT, COUNT(1) REC_PRCSD, (COUNT(1) /COUNT)*100 PCT_PRCSD, WIND_TS    from (
-Select count(1)  count, wind_ts from (
-SELECT 
-   READ_KAFKA_TS, WRSQL_TS, wind_ts
-FROM
-    (SELECT 
-        a.*, wind_ts
-    FROM
-         ( SELECT 
-        *
-    FROM
-        (SELECT 
-        READ_TS + INTERVAL Seq_no SECOND wind_ts
-    FROM
-        (SELECT 
-        MIN(READ_KAFKA_TS ) read_ts
-    FROM
-        T_FLINK_EXTR_COL) a, (SELECT 
-        @rownum:=@rownum + 1 AS Seq_no
-    FROM
-        (SELECT @rownum:=0) b, (SELECT 
-        1
-        FROM
-        T_FLINK_EXTR_COL) c) b) e  LIMIT 150) g LEFT JOIN T_FLINK_EXTR_COL a   
-    ON (
-        READ_KAFKA_TS  >= (wind_ts - INTERVAL 1 SECOND)
-            AND READ_KAFKA_TS  <= wind_ts)) f) h
-GROUP BY wind_ts) i LEFT JOIN T_FLINK_EXTR_COL j
-ON ( j.WRSQL_TS >= (i.wind_ts - INTERVAL 1 SECOND) and j.WRSQL_TS <= i.wind_ts AND j. READ_KAFKA_TS  >=  (i.wind_ts - INTERVAL 1 SECOND)  AND j. READ_KAFKA_TS <= i.WIND_TS) 
-GROUP BY WIND_TS;
+
+
+CREATE TABLE T_FLINK_PCT AS 
+   Select COUNT REC_EMIT, COUNT(1) REC_PRCSD, (COUNT(1) /COUNT)*100 PCT_PRCSD, WIND_TS    
+   from (
+         Select count(1)  count, wind_ts 
+         from (
+            SELECT READ_KAFKA_TS, WRSQL_TS, wind_ts
+            FROM
+               (SELECT FLINK.*, wind_ts
+               FROM
+                     (SELECT  *
+                     FROM
+                          (SELECT read_ts + INTERVAL Seq_no SECOND wind_ts_max
+                          FROM 
+                          (SELECT MIN(READ_KAFKA_TS ) read_ts FROM T_FLINK_EXTR_COL) MIN_KAFKA_TS,
+                          (SELECT @rownum:=@rownum + 1 AS Seq_no FROM (SELECT @rownum:=0) SEQ, (SELECT 1 FROM T_FLINK_EXTR_                           COL) DUMMY_REC) SEQ_NUM_GEN) 
+                     WIN_SLOTS LIMIT 150) 
+               WIN_SLOTS_LIMIT LEFT JOIN T_FLINK_EXTR_COL FLINK   
+               ON ( READ_KAFKA_TS  >= (wind_ts - INTERVAL 1 SECOND) AND READ_KAFKA_TS  <= wind_ts)) WIN_EMITTED_REC)
+            h GROUP BY wind_ts) 
+   WIN_EMITTED_REC LEFT JOIN T_FLINK_EXTR_COL FLINK
+   ON ( FLINK.WRSQL_TS >= (WIN_EMITTED_REC.wind_ts - INTERVAL 1 SECOND) and 
+   FLINK.WRSQL_TS <= WIN_EMITTED_REC.wind_ts AND 
+   FLINK.READ_KAFKA_TS  >=  (WIN_EMITTED_REC.wind_ts - INTERVAL 1 SECOND)  AND 
+   FLINK.READ_KAFKA_TS <= WIN_EMITTED_REC.WIND_TS)
+   GROUP BY WIND_TS;

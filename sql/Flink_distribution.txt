@@ -1,30 +1,28 @@
-CREATE TABLE T_FLINK_CNT_KAFKA_WRITE  AS Select COUNT REC_EMIT, COUNT(1) REC_PRCSD , WIND_TS    from (
-Select count(1)  count, wind_ts from (
-SELECT 
-   READ_TS, WRITE_TS, WRITE_TS - READ_TS latency, wind_ts
-FROM
-    (SELECT 
-        a.*, wind_ts
+CREATE TABLE T_FLINK_CNT_KAFKA_WRITE
+AS
+   SELECT COUNT REC_EMIT, COUNT (1) REC_PRCSD, WIND_TS
+     FROM (SELECT COUNT (1) COUNT, wind_ts
+             FROM (SELECT READ_TS,
+                          WRITE_TS,
+                          WRITE_TS - READ_TS latency,
+                          wind_ts
+                     FROM (SELECT FLINK.*, wind_ts
+                             FROM (SELECT *
+                                     FROM (SELECT READ_TS + INTERVAL Seq_no SECOND wind_ts
     FROM
-         ( SELECT 
-        *
-    FROM
-        (SELECT 
-        READ_TS + INTERVAL Seq_no SECOND wind_ts
-    FROM
-        (SELECT 
+        (SELECT
         MIN(READ_TS) read_ts
     FROM
-        T_FLINK_BENCHMARK) a, (SELECT 
+        T_FLINK_BENCHMARK) MIN_READ_TS, (SELECT
         @rownum:=@rownum + 1 AS Seq_no
     FROM
-        (SELECT @rownum:=0) b, (SELECT 
+        (SELECT @rownum:=0) SEQ, (SELECT
         1
         FROM
-        T_FLINK_BENCHMARK) c) b) e  LIMIT 35) g LEFT JOIN T_FLINK_BENCHMARK a   
+        T_FLINK_BENCHMARK) DUMMY_REC) SEQ_NUM_GEN) WIN_SLOTS  LIMIT 35) WIN_SLOTS_LIMIT LEFT JOIN T_FLINK_BENCHMARK FLINK
     ON (
         READ_TS  >= (wind_ts - INTERVAL 10 SECOND)
-            AND READ_TS  <= wind_ts)) f) h
-GROUP BY wind_ts) i LEFT JOIN T_FLINK_BENCHMARK j
-ON ( j.write_ts >= (i.wind_ts - INTERVAL 10 SECOND) and j.write_ts <= i.wind_ts) 
+            AND READ_TS  <= wind_ts)) WIN_READ_REC) h
+GROUP BY wind_ts) WIN_EMITTED_REC  LEFT JOIN T_FLINK_BENCHMARK FLINK
+ON ( FLINK.write_ts >= (WIN_READ_REC.wind_ts - INTERVAL 10 SECOND) and FLINK.write_ts <= WIN_READ_REC.wind_ts)
 GROUP BY WIND_TS;
